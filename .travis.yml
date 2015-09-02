@@ -5,5 +5,6 @@ addons:
     packages:
       - python-pip
       - python-matplotlib
+      - python-tk
 script:
   - ./bin/pltcli ./sample_data/sin.csv ./sample_data/cos.csv --label '$\sin$' --label '$\cos$' --show-grid --x-title '$x$' --y-title '$y$' -o hoge.png
