@@ -1,6 +1,9 @@
 laugnage: python
 sudo: false
-install:
-  - "pip install matplotlib"
+addons:
+  apt:
+    packages:
+      - python-pip
+      - python-matplotlib
 script:
   - ./bin/pltcli ./sample_data/sin.csv ./sample_data/cos.csv --label '$\sin$' --label '$\cos$' --show-grid --x-title '$x$' --y-title '$y$' -o hoge.png
