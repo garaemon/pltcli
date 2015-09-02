@@ -1,6 +1,9 @@
 Basic usage
 ===========
 
+Plot one csv file
+-----------------
+
 You can simply plot your csv file without any option.
 ```
 pltcli sin.csv
@@ -23,3 +26,12 @@ x,y
 
 And you can get following chart:
 ![sin](images/sin.png)
+
+
+Plot multiple csv files
+-----------------------
+You can plot multiple csv files.
+```
+pltcli sin.csv cos.csv
+```
+![sin_cos](images/sin_cos.png)
