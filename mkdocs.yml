@@ -1,2 +1,5 @@
 site_name: pltcli
 theme: readthedocs
+pages:
+  - 'Introduction': index.md
+  - 'Plot your csv files': 01_basic.md
