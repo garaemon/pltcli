@@ -107,8 +107,10 @@ def expandFile(filename):
     suffix_field_reg = re.compile('^(.*)\[(.*)\]$')
     if suffix_field_reg.match(filename):
         suffix = suffix_field_reg.match(filename).group(2)
-        (xfield, yfield) = suffix.split(":")
-        return [(suffix_field_reg.match(filename).group(1), xfield, yfield)]
+        # fields := [[0, 1], [0, 2], ...]
+        fields = [fields.split(":") for fields in suffix.split(",")]
+        return [(suffix_field_reg.match(filename).group(1), xfield, yfield)
+                for xfield, yfield in fields]
     else:
         return [(filename, 0, 1)]
 

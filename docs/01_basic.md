@@ -64,3 +64,6 @@ x,cos,sin
 0.4,0.9210609940028851,0.3894183423086505
 ...
 ```
+
+You can use `,` character to specify multiple field set in one argument.
+`pltcli cos_sin.csv[x:cos,x:sin]` is equivalent to `pltcli cos_sin.csv[x:cos] cos_sin.csv[x:sin]`.
