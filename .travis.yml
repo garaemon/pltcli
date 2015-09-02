@@ -10,4 +10,5 @@ script:
   - ./bin/pltcli ./sample_data/sin.csv -o hoge.png
   - ./bin/pltcli ./sample_data/sin.csv --label "foo" -o hoge.png
   - ./bin/pltcli ./sample_data/sin.csv --show-grid -o hoge.png
+  - ./bin/pltcli ./sample_data/sin.csv --color-theme d3js20 -o hoge.png
   - ./bin/pltcli ./sample_data/sin.csv ./sample_data/cos.csv --label '$\sin$' --label '$\cos$' --show-grid --x-title '$x$' --y-title '$y$' -o hoge.png
