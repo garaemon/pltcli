@@ -1,5 +1,5 @@
 # pltcli [![Build Status](https://travis-ci.org/garaemon/pltcli.svg?branch=master)](https://travis-ci.org/garaemon/pltcli) [![Document Status](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](http://pltcli.readthedocs.org/en/latest/)
-![cos.png](docs/images/cos.png)
+![pltcli](images/pltcli.png)
 
 pltcli is a command line tool to plot data
 
