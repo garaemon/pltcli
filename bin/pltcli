@@ -177,7 +177,7 @@ class FileData():
         if self.label:
             return self.label
         else:
-            return self.filename
+            return "%s[%s:%s]" % (self.filename, self.xfield, self.yfield)
 
 class Plotter():
     pass
