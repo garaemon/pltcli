@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 # -*- mode: python -*-
 import matplotlib as mpl
+import os
+if not os.environ.has_key("DISPLAY"):
+    mpl.use("AGG")
 # mpl.use('Qt4Agg')
 # mpl.use('GTKCairo')
 # mpl.use('GTK')
 # mpl.use('WXAgg')
 import matplotlib.pyplot as plt
 import argparse
-import os
+
 import csv
 import re
 
