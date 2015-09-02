@@ -38,6 +38,13 @@ class ConfigParser():
         return parser
 
 class Theme():
+    """
+    Super class for color theme.
+    It requires following methods to subclasses:
+      - colorCycle: return a list of colors to plot different sources.
+    It required following attributes to subclasses:
+      - theme_name: a list of names to represent the color theme.
+    """
     def colorCycle(self):
         raise Exception("colorCycle is not yet implemented")
 
@@ -96,6 +103,12 @@ class FileData():
         if not os.path.exists(self.filename):
             raise Exception("%s does not exists" % (self.filename))
     def read(self):
+        """
+        read data from csv file and store it in data attribute.
+        data is an array of arrays.
+        If the csv file has index line at the first line, index srings
+        will be stored in index attributes.
+        """
         with open(self.filename, "r") as f:
             reader = csv.reader(f)
             if self.has_index:
