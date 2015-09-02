@@ -10,7 +10,7 @@ if not os.environ.has_key("DISPLAY"):
 # mpl.use('WXAgg')
 import matplotlib.pyplot as plt
 import argparse
-
+import sys
 import csv
 import re
 
@@ -32,6 +32,9 @@ class ConfigParser():
         parser.add_argument("--show-grid", action="store_true", help="Show grid")
         parser.add_argument("--color-theme", default="d3js10", help="color theme")
         parser.add_argument("--output", "-o", help="output to image file")
+        parser.add_argument("--sort-x", action="store_true", help="sort x values")
+        parser.add_argument("--tight", action="store_true", help="set range of x and y strictly from dataset")
+        parser.add_argument("--legend-pos", default="ru", help="position of legend (ru, lu, rl, ll)")
         return parser
 
 class Theme():
@@ -131,20 +134,38 @@ class FileData():
             return self.filename
 
 class LinePlotter():
-    def run(self, data, show_grid=False, xtitle=None, ytitle=None):
+    def run(self, data, show_grid=False, xtitle=None,
+            ytitle=None, sort_x=False, tight=False):
         ax = plt.gca()
+        min_x = sys.float_info.max
+        max_x = -sys.float_info.max
+        min_y = sys.float_info.max
+        max_y = -sys.float_info.max
         for d in data:
             xs = d.xs()
             ys = d.ys()
+            concatenated = zip(xs, ys)
+            if sort_x:
+                concatenated.sort(key=lambda x: x[0])
+                xs = [x[0] for x in concatenated]
+                ys = [x[1] for x in concatenated]
             print "Plotting", d.getLabel()
             line, = ax.plot(xs, ys, label=d.getLabel())
             line.set_antialiased(True)
+            min_x = min(xs + [min_x])
+            max_x = max(xs + [max_x])
+            min_y = min(ys + [min_y])
+            max_y = max(ys + [max_y])
+        if tight:
+            ax.set_xlim(min_x, max_x)
+            ax.set_ylim(min_y, max_y)
         if show_grid:
             ax.grid()
         if xtitle:
             ax.set_xlabel(xtitle)
         if ytitle:
             ax.set_ylabel(ytitle)
+
 class PltCli():
     """Application class"""
     def __init__(self, args):
@@ -171,8 +192,17 @@ class PltCli():
         self.plotter.run(data,
                          show_grid=self.args.show_grid,
                          xtitle=self.args.x_title,
-                         ytitle=self.args.y_title)
-        plt.legend()
+                         ytitle=self.args.y_title,
+                         sort_x=self.args.sort_x,
+                         tight=self.args.tight)
+        if self.args.legend_pos == "ru":
+            plt.legend(loc=1)
+        elif self.args.legend_pos == "lu":
+            plt.legend(loc=2)
+        elif self.args.legend_pos == "ld":
+            plt.legend(loc=3)
+        elif self.args.legend_pos == "rd":
+            plt.legend(loc=4)
         if self.args.output:
             plt.savefig(self.args.output)
         else:
