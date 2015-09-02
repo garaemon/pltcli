@@ -5,6 +5,7 @@ import argparse
 import os
 import csv
 import re
+import matplotlib as mpl
 
 class ConfigParser():
     """
@@ -21,7 +22,53 @@ class ConfigParser():
         parser.add_argument("--x-title")
         parser.add_argument("--y-title")
         parser.add_argument("--show-grid", action="store_true", help="Show grid")
+        parser.add_argument("--color-theme", default="d3js10", help="color theme")
         return parser
+
+class Theme():
+    def colorCycle(self):
+        raise Exception("colorCycle is not yet implemented")
+
+class D3JSTheme10():
+    theme_name = ["D3JSTheme10", "d3js10"]
+    def colorCycle(self):
+        return ["#1f77b4",
+                "#ff7f0e",
+                "#2ca02c",
+                "#d62728",
+                "#9467bd",
+                "#8c564b",
+                "#e377c2",
+                "#7f7f7f",
+                "#bcbd22",
+                "#17becf"]
+
+
+class D3JSTheme20():
+    theme_name = ["D3JSTheme20", "d3js20"]
+    def colorCycle(self):
+        return ["#1f77b4",
+                "#aec7e8",
+                "#ff7f0e",
+                "#ffbb78",
+                "#2ca02c",
+                "#98df8a",
+                "#d62728",
+                "#ff9896",
+                "#9467bd",
+                "#c5b0d5",
+                "#8c564b",
+                "#c49c94",
+                "#e377c2",
+                "#f7b6d2",
+                "#7f7f7f",
+                "#c7c7c7",
+                "#bcbd22",
+                "#dbdb8d",
+                "#17becf",
+                "#9edae5"]
+
+THEME_CLASSES = [D3JSTheme10, D3JSTheme20]
 
 class FileData():
     def __init__(self, filename, has_index=True, label=None):
@@ -75,7 +122,8 @@ class LinePlotter():
             xs = d.xs()
             ys = d.ys()
             print "Plotting", d.getLabel()
-            ax.plot(xs, ys, label=d.getLabel())
+            line, = ax.plot(xs, ys, label=d.getLabel())
+            line.set_antialiased(True)
         if show_grid:
             ax.grid()
         if xtitle:
@@ -100,6 +148,11 @@ class PltCli():
             data = [FileData(f) for f in self.args.files]
         for d in data:
             d.read()
+        # setup theme
+        for theme in THEME_CLASSES:
+            if self.args.color_theme in theme.theme_name:
+                mpl.rcParams['axes.color_cycle'] = theme().colorCycle()
+                break
         self.plotter.run(data,
                          show_grid=self.args.show_grid,
                          xtitle=self.args.x_title,
