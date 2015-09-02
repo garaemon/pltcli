@@ -25,10 +25,10 @@ class ConfigParser():
     def argParser(self):
         parser = argparse.ArgumentParser(prog='pltcli')
         parser.add_argument("--type", "-t", default="line", help="Chart type. default is line")
-        parser.add_argument("files", nargs='+', default=[], help="Files to plot")
-        parser.add_argument("--label", action="append", default=[], help="Labels of files")
-        parser.add_argument("--x-title")
-        parser.add_argument("--y-title")
+        parser.add_argument("files", nargs='+', default=[], help="csv files to plot.")
+        parser.add_argument("--label", action="append", default=[], help="Labels of files which are used in legends.")
+        parser.add_argument("--x-title", help="title on x axis")
+        parser.add_argument("--y-title", help="title on y axis")
         parser.add_argument("--show-grid", action="store_true", help="Show grid")
         parser.add_argument("--color-theme", default="d3js10", help="color theme")
         parser.add_argument("--output", "-o", help="output to image file")
@@ -93,6 +93,7 @@ class D3JSTheme20(Theme):
                 "#17becf",
                 "#9edae5"]
 
+# List of theme classes
 THEME_CLASSES = [D3JSTheme10, D3JSTheme20]
 
 class FileData():
@@ -146,7 +147,11 @@ class FileData():
         else:
             return self.filename
 
-class LinePlotter():
+class Plotter():
+    pass
+
+class LinePlotter(Plotter):
+    plotter_name = ["line", "2dline"]
     def run(self, data, show_grid=False, xtitle=None,
             ytitle=None, sort_x=False, tight=False):
         ax = plt.gca()
@@ -197,7 +202,7 @@ class PltCli():
             data = [FileData(f) for f in self.args.files]
         for d in data:
             d.read()
-        # setup theme
+        # setup color theme
         for theme in THEME_CLASSES:
             if self.args.color_theme in theme.theme_name:
                 mpl.rcParams['axes.color_cycle'] = theme().colorCycle()
