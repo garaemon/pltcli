@@ -13,7 +13,7 @@ import argparse
 import sys
 import csv
 import re
-
+from itertools import chain
 
 class ConfigParser():
     """
@@ -96,9 +96,32 @@ class D3JSTheme20(Theme):
 # List of theme classes
 THEME_CLASSES = [D3JSTheme10, D3JSTheme20]
 
+def expandFile(filename):
+    """
+    return a list of tuples like (filename, x_field, y_filed).
+    If filename is like foo.csv, it returns [(foo.csv, 0, 1)].
+    If filename is like foo.csv[x:y], it returns [(foo.csv, x, y)].
+    """
+    # Regular expressoin to check filename has field suffix like
+    # foo.csv[0:1]
+    suffix_field_reg = re.compile('^(.*)\[(.*)\]$')
+    if suffix_field_reg.match(filename):
+        suffix = suffix_field_reg.match(filename).group(2)
+        (xfield, yfield) = suffix.split(":")
+        return [(suffix_field_reg.match(filename).group(1), xfield, yfield)]
+    else:
+        return [(filename, 0, 1)]
+
 class FileData():
-    def __init__(self, filename, has_index=True, label=None):
+    # Use regular expression to check value is able to be parsed
+    # into float value
+    # see http://d.hatena.ne.jp/artgear/20130222/float_type_regular_expression
+    float_reg = re.compile('^[+-]?(\d*\.\d+|\d+\.?\d*)([eE][+-]?\d+|)\Z')
+    int_reg = re.compile('^[+-]?(\d+)')
+    def __init__(self, filename, xfield, yfield, has_index=True, label=None):
         self.filename = filename
+        self.xfield = xfield
+        self.yfield = yfield
         self.has_index = has_index
         self.label = label
         if not os.path.exists(self.filename):
@@ -120,27 +143,36 @@ class FileData():
             for row in reader:
                 if row:
                     self.data.append(self.parseFileRow(row))
+        # setup xfield_index and yfield_index
+        if isinstance(self.xfield, int):
+            self.xfield_index = self.xfield
+        elif self.int_reg.match(self.xfield):
+            self.xfield_index = int(self.xfield)
+        else:
+            self.xfield_index = self.index.index(self.xfield)
+        if isinstance(self.yfield, int):
+            self.yfield_index = self.yfield
+        elif self.int_reg.match(self.yfield):
+            self.yfield_index = int(self.yfield)
+        else:
+            self.yfield_index = self.index.index(self.yfield)
     def parseFileRow(self, row):
         """
         row is a list of strings.
         """
-        # Use regular expression to check value is able to be parsed
-        # into float value
-        # see http://d.hatena.ne.jp/artgear/20130222/float_type_regular_expression
-        float_reg = re.compile('^[+-]?(\d*\.\d+|\d+\.?\d*)([eE][+-]?\d+|)\Z')
         parsed_row = []
         for r in row:
-            if float_reg.match(r):
+            if self.float_reg.match(r):
                 parsed_row.append(float(r))
             else:
                 parsed_row.append(r)
         return parsed_row
     def xs(self):
         """get x values"""
-        return [d[0] for d in self.data]
+        return [d[self.xfield_index] for d in self.data]
     def ys(self):
         """get y values"""
-        return [d[1] for d in self.data]
+        return [d[self.yfield_index] for d in self.data]
     def getLabel(self):
         if self.label:
             return self.label
@@ -192,14 +224,16 @@ class PltCli():
         else:
             raise Exception("Unknown type: %s" % (args.type))
         self.args = args
-
+        # expand self.args.files into self.files
+        expanded_files = [expandFile(f) for f in self.args.files]
+        self.files = list(chain.from_iterable(expanded_files))
     def run(self):
         # Parse file first
         if self.args.label:
-            data = [FileData(f, label=l) for f,l in
-                    zip(self.args.files, self.args.label)]
+            data = [FileData(f[0], f[1], f[2], label=l) for f,l in
+                    zip(self.files, self.args.label)]
         else:
-            data = [FileData(f) for f in self.args.files]
+            data = [FileData(f[0], f[1], f[2]) for f in self.files]
         for d in data:
             d.read()
         # setup color theme
