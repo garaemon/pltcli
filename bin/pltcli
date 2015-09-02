@@ -23,7 +23,7 @@ class ConfigParser():
     def __init__(self):
         pass
     def argParser(self):
-        parser = argparse.ArgumentParser(prog='rqt_histogram_plot', add_help=False)
+        parser = argparse.ArgumentParser(prog='pltcli')
         parser.add_argument("--type", "-t", default="line", help="Chart type. default is line")
         parser.add_argument("files", nargs='+', default=[], help="Files to plot")
         parser.add_argument("--label", action="append", default=[], help="Labels of files")
