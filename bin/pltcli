@@ -38,7 +38,7 @@ class Theme():
     def colorCycle(self):
         raise Exception("colorCycle is not yet implemented")
 
-class D3JSTheme10():
+class D3JSTheme10(Theme):
     """
     see https://github.com/mbostock/d3/wiki/Ordinal-Scales#category10
     """
@@ -56,7 +56,7 @@ class D3JSTheme10():
                 "#17becf"]
 
 
-class D3JSTheme20():
+class D3JSTheme20(Theme):
     """
     see https://github.com/mbostock/d3/wiki/Ordinal-Scales#category20
     """
