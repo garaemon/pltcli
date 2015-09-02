@@ -1,0 +1,114 @@
+#!/usr/bin/env python
+# -*- mode: python -*-
+import matplotlib.pyplot as plt
+import argparse
+import os
+import csv
+import re
+
+class ConfigParser():
+    """
+    ConfigParser class is a generic interface
+    for command line options and configuration file based options.
+    """
+    def __init__(self):
+        pass
+    def argParser(self):
+        parser = argparse.ArgumentParser(prog='rqt_histogram_plot', add_help=False)
+        parser.add_argument("--type", "-t", default="line", help="Chart type. default is line")
+        parser.add_argument("files", nargs='+', default=[], help="Files to plot")
+        parser.add_argument("--label", action="append", default=[], help="Labels of files")
+        parser.add_argument("--x-title")
+        parser.add_argument("--y-title")
+        parser.add_argument("--show-grid", action="store_true", help="Show grid")
+        return parser
+
+class FileData():
+    def __init__(self, filename, has_index=True, label=None):
+        self.filename = filename
+        self.has_index = has_index
+        self.label = label
+        if not os.path.exists(self.filename):
+            raise Exception("%s does not exists" % (self.filename))
+    def read(self):
+        with open(self.filename, "r") as f:
+            reader = csv.reader(f)
+            if self.has_index:
+                # if has_index is true, store index labels
+                # in self.index
+                self.index = reader.next()
+            self.data = []
+            for row in reader:
+                if row:
+                    self.data.append(self.parseFileRow(row))
+    def parseFileRow(self, row):
+        """
+        row is a list of strings.
+        """
+        # Use regular expression to check value is able to be parsed
+        # into float value
+        # see http://d.hatena.ne.jp/artgear/20130222/float_type_regular_expression
+        float_reg = re.compile('^[+-]?(\d*\.\d+|\d+\.?\d*)([eE][+-]?\d+|)\Z')
+        parsed_row = []
+        for r in row:
+            if float_reg.match(r):
+                parsed_row.append(float(r))
+            else:
+                parsed_row.append(r)
+        return parsed_row
+    def xs(self):
+        """get x values"""
+        return [d[0] for d in self.data]
+    def ys(self):
+        """get y values"""
+        return [d[1] for d in self.data]
+    def getLabel(self):
+        if self.label:
+            return self.label
+        else:
+            return self.filename
+
+class LinePlotter():
+    def run(self, data, show_grid=False, xtitle=None, ytitle=None):
+        ax = plt.gca()
+        for d in data:
+            xs = d.xs()
+            ys = d.ys()
+            print "Plotting", d.getLabel()
+            ax.plot(xs, ys, label=d.getLabel())
+        if show_grid:
+            ax.grid()
+        if xtitle:
+            ax.set_xlabel(xtitle)
+        if ytitle:
+            ax.set_ylabel(ytitle)
+class PltCli():
+    """Application class"""
+    def __init__(self, args):
+        if args.type == "line":
+            self.plotter = LinePlotter()
+        else:
+            raise Exception("Unknown type: %s" % (args.type))
+        self.args = args
+
+    def run(self):
+        # Parse file first
+        if self.args.label:
+            data = [FileData(f, label=l) for f,l in
+                    zip(self.args.files, self.args.label)]
+        else:
+            data = [FileData(f) for f in self.args.files]
+        for d in data:
+            d.read()
+        self.plotter.run(data,
+                         show_grid=self.args.show_grid,
+                         xtitle=self.args.x_title,
+                         ytitle=self.args.y_title)
+        plt.legend()
+        plt.show()
+
+if __name__ == "__main__":
+    parser = ConfigParser()
+    args = parser.argParser().parse_args()
+    pltcli = PltCli(args)
+    pltcli.run()
