@@ -23,6 +23,7 @@ class ConfigParser():
         parser.add_argument("--y-title")
         parser.add_argument("--show-grid", action="store_true", help="Show grid")
         parser.add_argument("--color-theme", default="d3js10", help="color theme")
+        parser.add_argument("--output", "-o", help="output to image file")
         return parser
 
 class Theme():
@@ -158,7 +159,10 @@ class PltCli():
                          xtitle=self.args.x_title,
                          ytitle=self.args.y_title)
         plt.legend()
-        plt.show()
+        if self.args.output:
+            plt.savefig(self.args.output)
+        else:
+            plt.show()
 
 if __name__ == "__main__":
     parser = ConfigParser()
