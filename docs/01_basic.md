@@ -45,7 +45,7 @@ You can specify fields for x and y axis by `filename[x:y]`.
 pltcli sample_data/cos.csv[1:0]
 ```
 
-![sample_data/cos.csv[1:0]](images/01_basic_image_02.png)
+![sample_data/cos.csv_1:0_](images/01_basic_image_02.png)
 
 If your csv file has *index line* at the first line, you can use the index
 for fields.
@@ -54,7 +54,7 @@ for fields.
 pltcli sample_data/cos_sin.csv[x:cos] sample_data/cos_sin.csv[x:sin]
 ```
 
-![sample_data/cos_sin.csv[x:cos] sample_data/cos_sin.csv[x:sin]](images/01_basic_image_03.png)
+![sample_data/cos_sin.csv_x:cos_ sample_data/cos_sin.csv_x:sin_](images/01_basic_image_03.png)
 
 cos_sin.csv looks like:
 

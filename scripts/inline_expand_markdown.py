@@ -34,7 +34,9 @@ def convert(infile, out, image_dir):
                         fout.write(line)
                 elif inline_pltcli_counter == 1:
                     # line should include command to execute
-                    output_filename = "%s/%s_image_%02d.png" % (image_dir, os.path.basename(infile).split(".")[0], image_counter)
+                    output_filename = "%s/%s_image_%02d.png" % (image_dir, os.path.basename(infile).split(".")[0].replace("\[", "_").replace("\]", "_"),
+                                                                image_counter)
+                    print "save to", output_filename
                     command = line[:-1] # remove newline
                     print "Executing command", command
                     subprocess.check_call(["pltcli"] + command.split() + ["-o", output_filename])
@@ -42,7 +44,8 @@ def convert(infile, out, image_dir):
                 elif inline_pltcli_counter == 2:
                     # end of inline-pltcli
                     inline_pltcli_counter = 0
-                    fout.write("![%s](%s)\n" % (command, os.path.relpath(output_filename, os.path.dirname(out))))
+                    fout.write("![%s](%s)\n" % (command.replace("[", "_").replace("]", "_"),
+                                                os.path.relpath(output_filename, os.path.dirname(out))))
                     image_counter = image_counter + 1
                     
 
