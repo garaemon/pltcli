@@ -13,8 +13,8 @@ script:
   - ./bin/pltcli ./sample_data/sin.csv --color-theme d3js20 -o hoge.png
   - ./bin/pltcli ./sample_data/sin.csv --legend-pos lu -o hoge.png
   - ./bin/pltcli ./sample_data/sin.csv --legend-pos ru -o hoge.png
-  - ./bin/pltcli ./sample_data/sin.csv --legend-pos ld -o hoge.png
-  - ./bin/pltcli ./sample_data/sin.csv --legend-pos rd -o hoge.png
+  - ./bin/pltcli ./sample_data/sin.csv --legend-pos ll -o hoge.png
+  - ./bin/pltcli ./sample_data/sin.csv --legend-pos rl -o hoge.png
   - ./bin/pltcli ./sample_data/sin.csv --sort-x -o hoge.png
   - ./bin/pltcli ./sample_data/sin.csv --tight -o hoge.png
   - ./bin/pltcli ./sample_data/sin.csv ./sample_data/cos.csv --label '$\sin$' --label '$\cos$' --show-grid --x-title '$x$' --y-title '$y$' -o hoge.png

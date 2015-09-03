@@ -253,9 +253,9 @@ class PltCli():
             plt.legend(loc=1)
         elif self.args.legend_pos == "lu":
             plt.legend(loc=2)
-        elif self.args.legend_pos == "ld":
+        elif self.args.legend_pos == "ll":
             plt.legend(loc=3)
-        elif self.args.legend_pos == "rd":
+        elif self.args.legend_pos == "rl":
             plt.legend(loc=4)
         if self.args.output:
             plt.savefig(self.args.output)
