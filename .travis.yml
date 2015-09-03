@@ -7,4 +7,5 @@ addons:
       - python-matplotlib
       - python-tk
 script:
+  - export PATH=$PATH:$PWD/bin
   - ./build_doc.sh
