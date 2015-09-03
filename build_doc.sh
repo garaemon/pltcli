@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 INPUT_FILES=$(find input_docs -name '*md')
 OUTPUT_DOC_DIR="docs"
