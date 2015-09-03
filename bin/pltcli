@@ -182,12 +182,16 @@ class FileData():
             return "%s[%s:%s]" % (self.filename, self.xfield, self.yfield)
 
 class Plotter():
-    pass
+    def run(self, data, **args):
+        raise Exception("Need to overload")
 
 class LinePlotter(Plotter):
     plotter_name = ["line", "2dline"]
     def run(self, data, show_grid=False, xtitle=None,
-            ytitle=None, sort_x=False, tight=False):
+            ytitle=None, sort_x=False, tight=False, **args):
+        """
+        Plot data using line plotting.
+        """
         ax = plt.gca()
         min_x = sys.float_info.max
         max_x = -sys.float_info.max
