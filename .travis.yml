@@ -7,7 +7,7 @@ addons:
       - python-matplotlib
       - python-tk
 install:
-  - pip install mkdocs
+  - pip install --user mkdocs
 script:
   - export PATH=$PATH:$PWD/bin
   - ./build_doc.sh
