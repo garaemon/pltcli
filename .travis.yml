@@ -6,6 +6,8 @@ addons:
       - python-pip
       - python-matplotlib
       - python-tk
+install:
+  - pip install mkdocs
 script:
   - export PATH=$PATH:$PWD/bin
   - ./build_doc.sh
