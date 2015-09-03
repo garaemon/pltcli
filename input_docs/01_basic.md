@@ -1,8 +1,5 @@
-Basic usage
-===========
-
 Plot one csv file
------------------
+=================
 
 You can simply plot your csv file without any option.
 ```
@@ -30,7 +27,7 @@ sample_data/sin.csv
 ```
 
 Plot multiple csv files
------------------------
+=======================
 You can plot multiple csv files.
 ```
 pltcli sample_data/sin.csv sample_data/cos.csv
@@ -42,7 +39,7 @@ sample_data/sin.csv sample_data/cos.csv
 
 
 Specify fields to plot
-====================
+======================
 You can specify fields for x and y axis by `filename[x:y]`.
 
 ```
