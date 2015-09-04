@@ -27,6 +27,7 @@ class ConfigParser():
         parser.add_argument("--type", "-t", default="line", help="Chart type. default is line")
         parser.add_argument("files", nargs='+', default=[], help="csv files to plot.")
         parser.add_argument("--label", action="append", default=[], help="Labels of files which are used in legends.")
+        parser.add_argument("--alpha", type=float, default=1, help="transparency parmaeter")
         parser.add_argument("--x-title", help="title on x axis")
         parser.add_argument("--y-title", help="title on y axis")
         parser.add_argument("--show-grid", action="store_true", help="Show grid")
@@ -188,17 +189,18 @@ class Plotter():
 class ScatterPlotter(Plotter):
     plotter_name = ["scatter", "2dscatter", "points"]
     def run(self, data, show_grid=False, xtitle=None,
-            ytitle=None, tight=False, **args):
+            ytitle=None, tight=False, alpha=1.0, color_theme=None, **args):
         ax = plt.gca()
         min_x = sys.float_info.max
         max_x = -sys.float_info.max
         min_y = sys.float_info.max
         max_y = -sys.float_info.max
-        for d in data:
+        for d, i in zip(data, range(len(data))):
             xs = d.xs()
             ys = d.ys()
             print "Plotting", d.getLabel()
-            ax.scatter(xs, ys, label=d.getLabel())
+            c = color_theme.colorCycle()[i % len(color_theme.colorCycle())]
+            ax.scatter(xs, ys, label=d.getLabel(), alpha=alpha, color=c)
             min_x = min(xs + [min_x])
             max_x = max(xs + [max_x])
             min_y = min(ys + [min_y])
@@ -274,14 +276,17 @@ class PltCli():
         # setup color theme
         for theme in THEME_CLASSES:
             if self.args.color_theme in theme.theme_name:
-                mpl.rcParams['axes.color_cycle'] = theme().colorCycle()
+                color_theme = theme()
+                mpl.rcParams['axes.color_cycle'] = color_theme.colorCycle()
                 break
         self.plotter.run(data,
                          show_grid=self.args.show_grid,
                          xtitle=self.args.x_title,
                          ytitle=self.args.y_title,
                          sort_x=self.args.sort_x,
-                         tight=self.args.tight)
+                         tight=self.args.tight,
+                         alpha=self.args.alpha,
+                         color_theme=color_theme)
         if self.args.legend_pos == "ru":
             plt.legend(loc=1)
         elif self.args.legend_pos == "lu":
