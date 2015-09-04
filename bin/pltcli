@@ -185,6 +185,34 @@ class Plotter():
     def run(self, data, **args):
         raise Exception("Need to overload")
 
+class ScatterPlotter(Plotter):
+    plotter_name = ["scatter", "2dscatter", "points"]
+    def run(self, data, show_grid=False, xtitle=None,
+            ytitle=None, tight=False, **args):
+        ax = plt.gca()
+        min_x = sys.float_info.max
+        max_x = -sys.float_info.max
+        min_y = sys.float_info.max
+        max_y = -sys.float_info.max
+        for d in data:
+            xs = d.xs()
+            ys = d.ys()
+            print "Plotting", d.getLabel()
+            ax.scatter(xs, ys, label=d.getLabel())
+            min_x = min(xs + [min_x])
+            max_x = max(xs + [max_x])
+            min_y = min(ys + [min_y])
+            max_y = max(ys + [max_y])
+        if tight:
+            ax.set_xlim(min_x, max_x)
+            ax.set_ylim(min_y, max_y)
+        if show_grid:
+            ax.grid()
+        if xtitle:
+            ax.set_xlabel(xtitle)
+        if ytitle:
+            ax.set_ylabel(ytitle)
+
 class LinePlotter(Plotter):
     plotter_name = ["line", "2dline"]
     def run(self, data, show_grid=False, xtitle=None,
@@ -222,13 +250,14 @@ class LinePlotter(Plotter):
         if ytitle:
             ax.set_ylabel(ytitle)
 
+PLOTTER_CLASSES = [ScatterPlotter, LinePlotter]
+
 class PltCli():
     """Application class"""
     def __init__(self, args):
-        if args.type == "line":
-            self.plotter = LinePlotter()
-        else:
-            raise Exception("Unknown type: %s" % (args.type))
+        for klass in PLOTTER_CLASSES:
+            if args.type in klass.plotter_name:
+                self.plotter = klass()
         self.args = args
         # expand self.args.files into self.files
         expanded_files = [expandFile(f) for f in self.args.files]

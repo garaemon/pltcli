@@ -5,3 +5,4 @@ pages:
   - 'Plot your csv files': 01_basic.md
   - 'Title': 02_title.md
   - 'Legend and Label': 03_label.md
+  - 'Scatter': 04_scatter.md
