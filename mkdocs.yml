@@ -6,3 +6,4 @@ pages:
   - 'Title': 02_title.md
   - 'Legend and Label': 03_label.md
   - 'Scatter': 04_scatter.md
+  - 'Histogram': 05_hist.md

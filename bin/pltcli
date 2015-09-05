@@ -14,6 +14,7 @@ import sys
 import csv
 import re
 from itertools import chain
+import numpy as np
 
 class ConfigParser():
     """
@@ -184,10 +185,10 @@ class FileData():
         return parsed_row
     def xs(self):
         """get x values"""
-        return [d[self.xfield_index] for d in self.data]
+        return np.array([d[self.xfield_index] for d in self.data])
     def ys(self):
         """get y values"""
-        return [d[self.yfield_index] for d in self.data]
+        return np.array([d[self.yfield_index] for d in self.data])
     def getLabel(self):
         if self.label:
             return self.label
@@ -220,6 +221,25 @@ class ScatterPlotter(Plotter):
         if tight:
             ax.set_xlim(min_x, max_x)
             ax.set_ylim(min_y, max_y)
+        if show_grid:
+            ax.grid()
+        if xtitle:
+            ax.set_xlabel(xtitle)
+        if ytitle:
+            ax.set_ylabel(ytitle)
+
+class HistogramPlotter(Plotter):
+    plotter_name = ["histogram", "hist"]
+    def run(self, data, xtitle=None,
+            ytitle=None, show_grid=False, color_theme=None, **args):
+        ax = plt.gca()
+        for d, i in zip(data, range(len(data))):
+            xs = d.xs()
+            ys = d.ys()
+            # estimate width
+            width = (max(xs) - min(xs)) / len(xs) / len(data)
+            c = color_theme.colorCycle()[i % len(color_theme.colorCycle())]
+            ax.bar(xs + i*width, ys, width=width, label=d.getLabel(), align="center", color=c)
         if show_grid:
             ax.grid()
         if xtitle:
@@ -264,7 +284,7 @@ class LinePlotter(Plotter):
         if ytitle:
             ax.set_ylabel(ytitle)
 
-PLOTTER_CLASSES = [ScatterPlotter, LinePlotter]
+PLOTTER_CLASSES = [ScatterPlotter, LinePlotter, HistogramPlotter]
 
 class PltCli():
     """Application class"""

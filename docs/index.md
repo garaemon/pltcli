@@ -33,10 +33,8 @@ optional arguments:
 ```
 
 ## TODOs
-* Scatter charts
 * Heatmap charts
 * 3-D plot
 * Histogram charts
 * Simple fitting
-* Specify column to plot
 * pypi package
