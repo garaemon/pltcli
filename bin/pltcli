@@ -34,6 +34,8 @@ class ConfigParser():
                             help="Labels of files which are used in legends.")
         parser.add_argument("--alpha", type=float, default=1,
                             help="transparency parmaeter")
+        parser.add_argument("--line-width", type=float, default=1,
+                            help="line width")
         parser.add_argument("--x-title", help="title on x axis")
         parser.add_argument("--y-title", help="title on y axis")
         parser.add_argument("--show-grid", action="store_true",
@@ -257,7 +259,10 @@ class HistogramPlotter(Plotter):
 class LinePlotter(Plotter):
     plotter_name = ["line", "2dline"]
     def run(self, data, show_grid=False, xtitle=None,
-            ytitle=None, sort_x=False, tight=False, alpha=None, **args):
+            ytitle=None, sort_x=False, tight=False,
+            alpha=None,
+            line_width=1,
+            **args):
         """
         Plot data using line plotting.
         """
@@ -275,7 +280,8 @@ class LinePlotter(Plotter):
                 xs = [x[0] for x in concatenated]
                 ys = [x[1] for x in concatenated]
             print "Plotting", d.getLabel()
-            line, = ax.plot(xs, ys, label=d.getLabel(), alpha=alpha)
+            line, = ax.plot(xs, ys, label=d.getLabel(), alpha=alpha,
+                            lw=line_width)
             line.set_antialiased(True)
             min_x = min(xs + [min_x])
             max_x = max(xs + [max_x])
@@ -326,6 +332,7 @@ class PltCli():
                          tight=self.args.tight,
                          alpha=self.args.alpha,
                          scatter_size=self.args.scatter_size,
+                         line_width=self.args.line_width,
                          color_theme=color_theme)
         if self.args.legend_pos == "ru":
             plt.legend(loc=1)
