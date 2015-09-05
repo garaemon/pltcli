@@ -24,18 +24,30 @@ class ConfigParser():
         pass
     def argParser(self):
         parser = argparse.ArgumentParser(prog='pltcli')
-        parser.add_argument("--type", "-t", default="line", help="Chart type. default is line")
+        parser.add_argument("--type", "-t", default="line",
+                            help="Chart type. default is line (%s)"
+                            % ", ".join([p.plotter_name[0]
+                                         for p in PLOTTER_CLASSES]))
         parser.add_argument("files", nargs='+', default=[], help="csv files to plot.")
-        parser.add_argument("--label", action="append", default=[], help="Labels of files which are used in legends.")
-        parser.add_argument("--alpha", type=float, default=1, help="transparency parmaeter")
+        parser.add_argument("--label", action="append", default=[],
+                            help="Labels of files which are used in legends.")
+        parser.add_argument("--alpha", type=float, default=1,
+                            help="transparency parmaeter")
         parser.add_argument("--x-title", help="title on x axis")
         parser.add_argument("--y-title", help="title on y axis")
-        parser.add_argument("--show-grid", action="store_true", help="Show grid")
-        parser.add_argument("--color-theme", default="d3js10", help="color theme")
+        parser.add_argument("--show-grid", action="store_true",
+                            help="Show grid")
+        parser.add_argument("--color-theme", default="d3js10",
+                            help="color theme (%s)"
+                            % ", ".join([t.theme_name[0]
+                                         for t in THEME_CLASSES]))
         parser.add_argument("--output", "-o", help="output to image file")
-        parser.add_argument("--sort-x", action="store_true", help="sort x values")
-        parser.add_argument("--tight", action="store_true", help="set range of x and y strictly from dataset")
-        parser.add_argument("--legend-pos", default="ru", help="position of legend (ru, lu, rl, ll)")
+        parser.add_argument("--sort-x", action="store_true",
+                            help="sort x values")
+        parser.add_argument("--tight", action="store_true",
+                            help="set range of x and y strictly from dataset")
+        parser.add_argument("--legend-pos", default="ru",
+                            help="position of legend (ru, lu, rl, ll)")
         return parser
 
 class Theme():
