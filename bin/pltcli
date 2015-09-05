@@ -38,6 +38,8 @@ class ConfigParser():
         parser.add_argument("--y-title", help="title on y axis")
         parser.add_argument("--show-grid", action="store_true",
                             help="Show grid")
+        parser.add_argument("--scatter-size", default=20, type=float,
+                            help="Size of scatter circles")
         parser.add_argument("--color-theme", default="d3js10",
                             help="color theme (%s)"
                             % ", ".join([t.theme_name[0]
@@ -202,7 +204,8 @@ class Plotter():
 class ScatterPlotter(Plotter):
     plotter_name = ["scatter", "2dscatter", "points"]
     def run(self, data, show_grid=False, xtitle=None,
-            ytitle=None, tight=False, alpha=1.0, color_theme=None, **args):
+            ytitle=None, tight=False, alpha=1.0, color_theme=None,
+            scatter_size=None, **args):
         ax = plt.gca()
         min_x = sys.float_info.max
         max_x = -sys.float_info.max
@@ -213,7 +216,7 @@ class ScatterPlotter(Plotter):
             ys = d.ys()
             print "Plotting", d.getLabel()
             c = color_theme.colorCycle()[i % len(color_theme.colorCycle())]
-            ax.scatter(xs, ys, label=d.getLabel(), alpha=alpha, color=c)
+            ax.scatter(xs, ys, s=scatter_size, label=d.getLabel(), alpha=alpha, color=c)
             min_x = min(xs + [min_x])
             max_x = max(xs + [max_x])
             min_y = min(ys + [min_y])
@@ -231,7 +234,9 @@ class ScatterPlotter(Plotter):
 class HistogramPlotter(Plotter):
     plotter_name = ["histogram", "hist"]
     def run(self, data, xtitle=None,
-            ytitle=None, show_grid=False, color_theme=None, **args):
+            ytitle=None, show_grid=False, color_theme=None,
+            alpha=None,
+            **args):
         ax = plt.gca()
         for d, i in zip(data, range(len(data))):
             xs = d.xs()
@@ -239,7 +244,9 @@ class HistogramPlotter(Plotter):
             # estimate width
             width = (max(xs) - min(xs)) / len(xs) / len(data)
             c = color_theme.colorCycle()[i % len(color_theme.colorCycle())]
-            ax.bar(xs + i*width, ys, width=width, label=d.getLabel(), align="center", color=c)
+            ax.bar(xs + i*width, ys, width=width, label=d.getLabel(),
+                   align="center", color=c,
+                   alpha=alpha)
         if show_grid:
             ax.grid()
         if xtitle:
@@ -250,7 +257,7 @@ class HistogramPlotter(Plotter):
 class LinePlotter(Plotter):
     plotter_name = ["line", "2dline"]
     def run(self, data, show_grid=False, xtitle=None,
-            ytitle=None, sort_x=False, tight=False, **args):
+            ytitle=None, sort_x=False, tight=False, alpha=None, **args):
         """
         Plot data using line plotting.
         """
@@ -268,7 +275,7 @@ class LinePlotter(Plotter):
                 xs = [x[0] for x in concatenated]
                 ys = [x[1] for x in concatenated]
             print "Plotting", d.getLabel()
-            line, = ax.plot(xs, ys, label=d.getLabel())
+            line, = ax.plot(xs, ys, label=d.getLabel(), alpha=alpha)
             line.set_antialiased(True)
             min_x = min(xs + [min_x])
             max_x = max(xs + [max_x])
@@ -318,6 +325,7 @@ class PltCli():
                          sort_x=self.args.sort_x,
                          tight=self.args.tight,
                          alpha=self.args.alpha,
+                         scatter_size=self.args.scatter_size,
                          color_theme=color_theme)
         if self.args.legend_pos == "ru":
             plt.legend(loc=1)
