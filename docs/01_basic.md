@@ -2,9 +2,11 @@ Plot one csv file
 =================
 
 You can simply plot your csv file without any option.
+
 ```
-pltcli sin.csv
+pltcli sample_data/sin.csv
 ```
+![sample_data/sin.csv](images/01_basic_image_00.png)
 
 sin.csv looks like::
 ```csv
@@ -21,16 +23,12 @@ x,y
 0.9,0.7833269096274834
 ```
 
-And you can get following chart:
-![sample_data/sin.csv](images/01_basic_image_00.png)
-
 Plot multiple csv files
 =======================
 You can plot multiple csv files.
 ```
 pltcli sample_data/sin.csv sample_data/cos.csv
 ```
-
 ![sample_data/sin.csv sample_data/cos.csv](images/01_basic_image_01.png)
 
 
@@ -41,7 +39,6 @@ You can specify fields for x and y axis by `filename[x:y]`.
 ```
 pltcli sample_data/cos.csv[1:0]
 ```
-
 ![sample_data/cos.csv_1:0_](images/01_basic_image_02.png)
 
 If your csv file has *index line* at the first line, you can use the index
@@ -50,7 +47,6 @@ for fields.
 ```
 pltcli sample_data/cos_sin.csv[x:cos] sample_data/cos_sin.csv[x:sin]
 ```
-
 ![sample_data/cos_sin.csv_x:cos_ sample_data/cos_sin.csv_x:sin_](images/01_basic_image_03.png)
 
 cos_sin.csv looks like:

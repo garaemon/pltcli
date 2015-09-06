@@ -7,7 +7,6 @@ You can use `--label` option to specify them.
 ```
 pltcli sample_data/sin.csv --label sin
 ```
-
 ![sample_data/sin.csv --label sin](images/03_label_image_00.png)
 
 When you plotting multiple csv files, you need to specify labels as many as input files.
@@ -15,7 +14,6 @@ When you plotting multiple csv files, you need to specify labels as many as inpu
 ```
 pltcli sample_data/sin.csv sample_data/cos.csv --label sin --label cos
 ```
-
 ![sample_data/sin.csv sample_data/cos.csv --label sin --label cos](images/03_label_image_01.png)
 
 You can use tex literal in label as well as titles.
@@ -23,7 +21,6 @@ You can use tex literal in label as well as titles.
 ```
 pltcli sample_data/sin.csv sample_data/cos.csv --label $\sin$ --label $\cos$
 ```
-
 ![sample_data/sin.csv sample_data/cos.csv --label $\sin$ --label $\cos$](images/03_label_image_02.png)
 
 Position of legends
@@ -37,24 +34,19 @@ Default is `ru`.
 ```
 pltcli sample_data/sin.csv --legend-pos ru
 ```
-
 ![sample_data/sin.csv --legend-pos ru](images/03_label_image_03.png)
 
 ```
 pltcli sample_data/sin.csv --legend-pos lu
 ```
-
 ![sample_data/sin.csv --legend-pos lu](images/03_label_image_04.png)
-
 
 ```
 pltcli sample_data/sin.csv --legend-pos rl
 ```
-
 ![sample_data/sin.csv --legend-pos rl](images/03_label_image_05.png)
 
 ```
 pltcli sample_data/sin.csv --legend-pos ll
 ```
-
 ![sample_data/sin.csv --legend-pos ll](images/03_label_image_06.png)

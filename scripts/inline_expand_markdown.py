@@ -41,6 +41,11 @@ def convert(infile, out, image_dir):
                     print "Executing command", command
                     subprocess.check_call(["pltcli"] + command.split() + ["-o", output_filename])
                     inline_pltcli_counter = 2
+                    fout.write(
+                        """```
+pltcli %s
+```
+""" % (command))
                 elif inline_pltcli_counter == 2:
                     # end of inline-pltcli
                     inline_pltcli_counter = 0
