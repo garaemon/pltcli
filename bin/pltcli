@@ -53,6 +53,8 @@ class ConfigParser():
                             help="set range of x and y strictly from dataset")
         parser.add_argument("--legend-pos", default="ru",
                             help="position of legend (ru, lu, rl, ll)")
+        parser.add_argument("--filter",
+                            help="filter data by inline python")
         return parser
 
 class Theme():
@@ -138,7 +140,9 @@ class FileData():
     # see http://d.hatena.ne.jp/artgear/20130222/float_type_regular_expression
     float_reg = re.compile('^[+-]?(\d*\.\d+|\d+\.?\d*)([eE][+-]?\d+|)\Z')
     int_reg = re.compile('^[+-]?(\d+)')
-    def __init__(self, filename, xfield, yfield, has_index=True, label=None):
+    def __init__(self, filename, xfield, yfield,
+                 has_index=True, label=None, filter=None):
+        self.filter = filter
         self.filename = filename
         self.xfield = xfield
         self.yfield = yfield
@@ -162,8 +166,13 @@ class FileData():
             self.data = []
             for row in reader:
                 if row:
-                    self.data.append(self.parseFileRow(row))
-        # setup xfield_index and yfield_index
+                    if self.filter:
+                        eval_result = eval(self.filter)
+                        if eval_result:
+                            self.data.append(self.parseFileRow(row))
+                    else:
+                        self.data.append(self.parseFileRow(row))
+                    # setup xfield_index and yfield_index
         if isinstance(self.xfield, int):
             self.xfield_index = self.xfield
         elif self.int_reg.match(self.xfield):
@@ -193,8 +202,10 @@ class FileData():
     def ys(self):
         """get y values"""
         return np.array([d[self.yfield_index] for d in self.data])
+    def indexFromFieldName(self, field):
+        return self.index.index(field)
     def getDataFromField(self, field):
-        return np.array([d[self.index.index(field)] for d in self.data])
+        return np.array([d[self.indexFromFieldName(field)] for d in self.data])
     def getLabel(self):
         if self.label:
             return self.label
@@ -306,6 +317,8 @@ class StatsPlotter(Plotter):
             print "filename:", d.filename
             print "  %d fields" % (len(d.index))
             print "  %d data lines" % (len(d.xs()))
+            if len(d.xs()) == 0:
+                return
             for index in d.index:
                 print "    %s:" % (index)
                 print "      min:", np.amin(d.getDataFromField(index))
@@ -327,10 +340,12 @@ class PltCli():
     def run(self):
         # Parse file first
         if self.args.label:
-            data = [FileData(f[0], f[1], f[2], label=l) for f,l in
+            data = [FileData(f[0], f[1], f[2], label=l, filter=self.args.filter)
+                    for f,l in
                     zip(self.files, self.args.label)]
         else:
-            data = [FileData(f[0], f[1], f[2]) for f in self.files]
+            data = [FileData(f[0], f[1], f[2], filter=self.args.filter)
+                    for f in self.files]
         for d in data:
             d.read()
         # setup color theme
