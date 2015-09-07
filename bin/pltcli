@@ -16,6 +16,7 @@ import re
 from itertools import chain
 import numpy as np
 
+
 class ConfigParser():
     """
     ConfigParser class is a generic interface
@@ -36,6 +37,7 @@ class ConfigParser():
                             help="transparency parmaeter")
         parser.add_argument("--line-width", type=float, default=1,
                             help="line width")
+        parser.add_argument("--title", help="title")
         parser.add_argument("--x-title", help="title on x axis")
         parser.add_argument("--y-title", help="title on y axis")
         parser.add_argument("--show-grid", action="store_true",
@@ -129,10 +131,14 @@ def expandFile(filename):
         suffix = suffix_field_reg.match(filename).group(2)
         # fields := [[0, 1], [0, 2], ...]
         fields = [fields.split(":") for fields in suffix.split(",")]
-        return [(suffix_field_reg.match(filename).group(1), xfield, yfield)
-                for xfield, yfield in fields]
+        if len(fields[0]) == 3:
+            return [(suffix_field_reg.match(filename).group(1), xfield, yfield, zfield)
+                    for xfield, yfield, zfield in fields]
+        else:
+            return [(suffix_field_reg.match(filename).group(1), xfield, yfield, 2)
+                    for xfield, yfield in fields]
     else:
-        return [(filename, 0, 1)]
+        return [(filename, 0, 1, 2)]
 
 class FileData():
     # Use regular expression to check value is able to be parsed
@@ -140,12 +146,13 @@ class FileData():
     # see http://d.hatena.ne.jp/artgear/20130222/float_type_regular_expression
     float_reg = re.compile('^[+-]?(\d*\.\d+|\d+\.?\d*)([eE][+-]?\d+|)\Z')
     int_reg = re.compile('^[+-]?(\d+)')
-    def __init__(self, filename, xfield, yfield,
+    def __init__(self, filename, xfield, yfield, zfield=None,
                  has_index=True, label=None, filter=None):
         self.filter = filter
         self.filename = filename
         self.xfield = xfield
         self.yfield = yfield
+        self.zfield = zfield
         self.has_index = has_index
         self.label = label
         if not os.path.exists(self.filename):
@@ -185,6 +192,13 @@ class FileData():
             self.yfield_index = int(self.yfield)
         else:
             self.yfield_index = self.index.index(self.yfield)
+        if self.zfield:
+            if isinstance(self.zfield, int):
+                self.zfield_index = self.zfield
+            elif self.int_reg.match(self.zfield):
+                self.zfield_index = int(self.zfield)
+            else:
+                self.zfield_index = self.index.index(self.zfield)
     def parseFileRow(self, row):
         """
         row is a list of strings.
@@ -202,6 +216,9 @@ class FileData():
     def ys(self):
         """get y values"""
         return np.array([d[self.yfield_index] for d in self.data])
+    def zs(self):
+        """get z values"""
+        return np.array([d[self.zfield_index] for d in self.data])
     def indexFromFieldName(self, field):
         return self.index.index(field)
     def getDataFromField(self, field):
@@ -215,6 +232,16 @@ class FileData():
 class Plotter():
     def run(self, data, **args):
         raise Exception("Need to overload")
+    def commonHook(self, ax,
+                   title=None,
+                   xtitle=None,
+                   ytitle=None):
+        if title:
+            ax.set_title(title)
+        if xtitle:
+            ax.set_xlabel(xtitle)
+        if ytitle:
+            ax.set_ylabel(ytitle)
 
 class ScatterPlotter(Plotter):
     plotter_name = ["scatter", "2dscatter", "points"]
@@ -241,11 +268,8 @@ class ScatterPlotter(Plotter):
             ax.set_ylim(min_y, max_y)
         if show_grid:
             ax.grid()
-        if xtitle:
-            ax.set_xlabel(xtitle)
-        if ytitle:
-            ax.set_ylabel(ytitle)
-
+        return ax
+    
 class HistogramPlotter(Plotter):
     plotter_name = ["histogram", "hist"]
     def run(self, data, xtitle=None,
@@ -264,10 +288,7 @@ class HistogramPlotter(Plotter):
                    alpha=alpha)
         if show_grid:
             ax.grid()
-        if xtitle:
-            ax.set_xlabel(xtitle)
-        if ytitle:
-            ax.set_ylabel(ytitle)
+        return ax
 
 class LinePlotter(Plotter):
     plotter_name = ["line", "2dline"]
@@ -305,11 +326,7 @@ class LinePlotter(Plotter):
             ax.set_ylim(min_y, max_y)
         if show_grid:
             ax.grid()
-        if xtitle:
-            ax.set_xlabel(xtitle)
-        if ytitle:
-            ax.set_ylabel(ytitle)
-
+        return ax
 class StatsPlotter(Plotter):
     plotter_name = ["stats"]
     def run(self, data, **args):
@@ -324,8 +341,41 @@ class StatsPlotter(Plotter):
                 print "      min:", np.amin(d.getDataFromField(index))
                 print "      max:", np.amax(d.getDataFromField(index))
                 print "      mean:", np.mean(d.getDataFromField(index))
-            
-PLOTTER_CLASSES = [ScatterPlotter, LinePlotter, HistogramPlotter, StatsPlotter]
+        return None
+class HeatmapPlotter(Plotter):
+    plotter_name = ["heatmap"]
+    def run(self, data, **args):
+        fig, ax = plt.subplots()
+        for d in data:
+            xs = d.xs()
+            ys = d.ys()
+            zs = d.zs()
+            xmin = np.amin(xs)
+            ymin = np.amin(ys)
+            xmax = np.amax(xs)
+            ymax = np.amax(ys)
+            vmin = np.amin(zs)
+            vmax = np.amax(zs)
+            xnum = len(list(set(xs)))
+            ynum = len(list(set(ys)))
+            image = np.arange(0, xnum * ynum, 1.0).reshape((xnum, ynum))
+            for x, xi in zip(sorted(list(set(xs))), range(xnum)):
+                for y, yi in zip(sorted(list(set(ys))), range(ynum)):
+                    for org_x, org_y, z in zip(xs, ys, zs):
+                        if org_x == x and org_y == y:
+                            image[xi][yi] = z
+            #ax.invert_yaxis()
+            cax = ax.imshow(image, vmax=vmax, vmin=vmin,
+                            aspect="auto",
+                            interpolation="none",
+                            cmap="gnuplot")
+            ax.set_xticklabels(sorted(list(set(xs))))
+            ax.set_yticklabels(sorted(list(set(ys))))
+        fig.colorbar(cax)
+        return ax
+    
+PLOTTER_CLASSES = [ScatterPlotter, LinePlotter, HistogramPlotter,
+                   StatsPlotter, HeatmapPlotter]
 
 class PltCli():
     """Application class"""
@@ -340,11 +390,11 @@ class PltCli():
     def run(self):
         # Parse file first
         if self.args.label:
-            data = [FileData(f[0], f[1], f[2], label=l, filter=self.args.filter)
+            data = [FileData(f[0], f[1], f[2], f[3], label=l, filter=self.args.filter)
                     for f,l in
                     zip(self.files, self.args.label)]
         else:
-            data = [FileData(f[0], f[1], f[2], filter=self.args.filter)
+            data = [FileData(f[0], f[1], f[2], f[3], filter=self.args.filter)
                     for f in self.files]
         for d in data:
             d.read()
@@ -354,18 +404,20 @@ class PltCli():
                 color_theme = theme()
                 mpl.rcParams['axes.color_cycle'] = color_theme.colorCycle()
                 break
-        self.plotter.run(data,
-                         show_grid=self.args.show_grid,
-                         xtitle=self.args.x_title,
-                         ytitle=self.args.y_title,
-                         sort_x=self.args.sort_x,
-                         tight=self.args.tight,
-                         alpha=self.args.alpha,
-                         scatter_size=self.args.scatter_size,
-                         line_width=self.args.line_width,
-                         color_theme=color_theme)
+        ax = self.plotter.run(data,
+                              show_grid=self.args.show_grid,
+                              sort_x=self.args.sort_x,
+                              tight=self.args.tight,
+                              alpha=self.args.alpha,
+                              scatter_size=self.args.scatter_size,
+                              line_width=self.args.line_width,
+                              color_theme=color_theme)
         if self.args.type == "stats":
             return
+        self.plotter.commonHook(ax,
+                                title=self.args.title,
+                                xtitle=self.args.x_title,
+                                ytitle=self.args.y_title)
         if self.args.legend_pos == "ru":
             plt.legend(loc=1)
         elif self.args.legend_pos == "lu":
