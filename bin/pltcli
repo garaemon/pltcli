@@ -193,6 +193,8 @@ class FileData():
     def ys(self):
         """get y values"""
         return np.array([d[self.yfield_index] for d in self.data])
+    def getDataFromField(self, field):
+        return np.array([d[self.index.index(field)] for d in self.data])
     def getLabel(self):
         if self.label:
             return self.label
@@ -297,7 +299,20 @@ class LinePlotter(Plotter):
         if ytitle:
             ax.set_ylabel(ytitle)
 
-PLOTTER_CLASSES = [ScatterPlotter, LinePlotter, HistogramPlotter]
+class StatsPlotter(Plotter):
+    plotter_name = ["stats"]
+    def run(self, data, **args):
+        for d in data:
+            print "filename:", d.filename
+            print "  %d fields" % (len(d.index))
+            print "  %d data lines" % (len(d.xs()))
+            for index in d.index:
+                print "    %s:" % (index)
+                print "      min:", np.amin(d.getDataFromField(index))
+                print "      max:", np.amax(d.getDataFromField(index))
+                print "      mean:", np.mean(d.getDataFromField(index))
+            
+PLOTTER_CLASSES = [ScatterPlotter, LinePlotter, HistogramPlotter, StatsPlotter]
 
 class PltCli():
     """Application class"""
@@ -334,6 +349,8 @@ class PltCli():
                          scatter_size=self.args.scatter_size,
                          line_width=self.args.line_width,
                          color_theme=color_theme)
+        if self.args.type == "stats":
+            return
         if self.args.legend_pos == "ru":
             plt.legend(loc=1)
         elif self.args.legend_pos == "lu":
