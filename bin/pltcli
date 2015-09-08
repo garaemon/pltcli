@@ -423,7 +423,6 @@ class PltCli():
         if self.args.min_x != None and self.args.max_x != None:
             ax.set_xlim(self.args.min_x, self.args.max_x)
         if self.args.min_y != None  and self.args.max_y != None:
-            print "foo"
             ax.set_ylim(self.args.min_y, self.args.max_y)
         if self.args.title:
             ax.set_title(self.args.title)
@@ -431,7 +430,10 @@ class PltCli():
             ax.set_xlabel(self.args.x_title)
         if self.args.y_title:
             ax.set_ylabel(self.args.y_title)
-
+        if self.args.no_x_ticks:
+            ax.get_xaxis().set_visible(False)
+        if self.args.no_y_ticks:
+            ax.get_yaxis().set_visible(False)
         if not self.args.no_legend:
             if self.args.legend_pos == "ru":
                 plt.legend(loc=1)
