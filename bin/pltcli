@@ -45,6 +45,7 @@ class ConfigParser():
         parser.add_argument("--max-x", default=None, type=int)
         parser.add_argument("--min-y", default=None, type=int)
         parser.add_argument("--max-y", default=None, type=int)
+        parser.add_argument("--no-legend", action="store_true")
         parser.add_argument("--show-grid", action="store_true",
                             help="Show grid")
         parser.add_argument("--scatter-size", default=20, type=float,
@@ -444,14 +445,15 @@ class PltCli():
                                 min_y=self.args.min_y,
                                 max_x=self.args.max_x,
                                 max_y=self.args.max_y)
-        if self.args.legend_pos == "ru":
-            plt.legend(loc=1)
-        elif self.args.legend_pos == "lu":
-            plt.legend(loc=2)
-        elif self.args.legend_pos == "ll":
-            plt.legend(loc=3)
-        elif self.args.legend_pos == "rl":
-            plt.legend(loc=4)
+        if not self.args.no_legend:
+            if self.args.legend_pos == "ru":
+                plt.legend(loc=1)
+            elif self.args.legend_pos == "lu":
+                plt.legend(loc=2)
+            elif self.args.legend_pos == "ll":
+                plt.legend(loc=3)
+            elif self.args.legend_pos == "rl":
+                plt.legend(loc=4)
         if self.args.output:
             plt.savefig(self.args.output)
         else:
