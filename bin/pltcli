@@ -45,6 +45,8 @@ class ConfigParser():
         parser.add_argument("--max-x", default=None, type=float)
         parser.add_argument("--min-y", default=None, type=float)
         parser.add_argument("--max-y", default=None, type=float)
+        parser.add_argument("--no-x-ticks", action="store_true")
+        parser.add_argument("--no-y-ticks", action="store_true")
         parser.add_argument("--no-legend", action="store_true")
         parser.add_argument("--show-grid", action="store_true",
                             help="Show grid")
@@ -238,25 +240,6 @@ class FileData():
 class Plotter():
     def run(self, data, **args):
         raise Exception("Need to overload")
-    def commonHook(self, ax,
-                   title=None,
-                   xtitle=None,
-                   ytitle=None,
-                   min_x=None,
-                   max_x=None,
-                   min_y=None,
-                   max_y=None):
-        if min_x != None and max_x != None:
-            ax.set_xlim(min_x, max_x)
-        if min_y != None  and max_y != None:
-            print "foo"
-            ax.set_ylim(min_y, max_y)
-        if title:
-            ax.set_title(title)
-        if xtitle:
-            ax.set_xlabel(xtitle)
-        if ytitle:
-            ax.set_ylabel(ytitle)
 
 class ScatterPlotter(Plotter):
     plotter_name = ["scatter", "2dscatter", "points"]
@@ -437,14 +420,18 @@ class PltCli():
                               fill=self.args.fill)
         if self.args.type == "stats":
             return
-        self.plotter.commonHook(ax,
-                                title=self.args.title,
-                                xtitle=self.args.x_title,
-                                ytitle=self.args.y_title,
-                                min_x=self.args.min_x,
-                                min_y=self.args.min_y,
-                                max_x=self.args.max_x,
-                                max_y=self.args.max_y)
+        if self.args.min_x != None and self.args.max_x != None:
+            ax.set_xlim(self.args.min_x, self.args.max_x)
+        if self.args.min_y != None  and self.args.max_y != None:
+            print "foo"
+            ax.set_ylim(self.args.min_y, self.args.max_y)
+        if self.args.title:
+            ax.set_title(self.args.title)
+        if self.args.x_title:
+            ax.set_xlabel(self.args.x_title)
+        if self.args.y_title:
+            ax.set_ylabel(self.args.y_title)
+
         if not self.args.no_legend:
             if self.args.legend_pos == "ru":
                 plt.legend(loc=1)
