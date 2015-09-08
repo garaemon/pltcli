@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+"""
+Helper script to generate gaussian data
+"""
+
+import csv
+import sys
+import argparse
+
+import matplotlib.mlab as mlab
+import numpy as np
+from math import sqrt
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(prog="gaussian_data_generator")
+    parser.add_argument("--mean", "-m", default=0.0, type=float,
+                        help="Mean of gaussian distribution")
+    parser.add_argument("--variance", "-v", default=1.0, type=float,
+                        help="Variance of gaussian distribution")
+    parser.add_argument("--sampling-num", "-n", default=100, type=int,
+                        help="Number of samples")
+    parser.add_argument("output", help="output csv file")
+    args = parser.parse_args()
+    sigma = sqrt(args.variance)
+    xs = np.linspace(-3*sigma, 3*sigma, args.sampling_num)
+    ys = mlab.normpdf(xs, args.mean, sigma)
+    with open(args.output, "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(["x", "y"])
+        for x, y in zip(xs, ys):
+            writer.writerow([x, y])
