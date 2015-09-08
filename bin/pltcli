@@ -93,7 +93,7 @@ class D3JSTheme10(Theme):
     """
     see https://github.com/mbostock/d3/wiki/Ordinal-Scales#category10
     """
-    theme_name = ["D3JSTheme10", "d3js10"]
+    theme_name = ["d3js10", "D3JSTheme10"]
     def colorCycle(self):
         return ["#1f77b4",
                 "#ff7f0e",
@@ -111,7 +111,7 @@ class D3JSTheme20(Theme):
     """
     see https://github.com/mbostock/d3/wiki/Ordinal-Scales#category20
     """
-    theme_name = ["D3JSTheme20", "d3js20"]
+    theme_name = ["d3js20", "D3JSTheme20"]
     def colorCycle(self):
         return ["#1f77b4",
                 "#aec7e8",
@@ -254,8 +254,8 @@ class Plotter():
 
 class ScatterPlotter(Plotter):
     plotter_name = ["scatter", "2dscatter", "points"]
-    def run(self, data, show_grid=False, xtitle=None,
-            ytitle=None, tight=False, alpha=1.0, color_theme=None,
+    def run(self, data, show_grid=False,
+            tight=False, alpha=1.0, color_theme=None,
             scatter_size=None, **args):
         ax = plt.gca()
         min_x = sys.float_info.max
@@ -281,8 +281,8 @@ class ScatterPlotter(Plotter):
 
 class HistogramPlotter(Plotter):
     plotter_name = ["histogram", "hist"]
-    def run(self, data, xtitle=None,
-            ytitle=None, show_grid=False, color_theme=None,
+    def run(self, data,
+            show_grid=False, color_theme=None,
             alpha=None,
             **args):
         ax = plt.gca()
@@ -301,8 +301,8 @@ class HistogramPlotter(Plotter):
 
 class LinePlotter(Plotter):
     plotter_name = ["line", "2dline"]
-    def run(self, data, show_grid=False, xtitle=None,
-            ytitle=None, sort_x=False, tight=False,
+    def run(self, data, show_grid=False,
+            sort_x=False, tight=False,
             alpha=None,
             fill=False,
             line_width=1,
