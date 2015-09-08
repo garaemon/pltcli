@@ -2,6 +2,9 @@
 # -*- mode: python -*-
 import matplotlib as mpl
 import os
+
+# If no DISPLAY is available, we cannot use
+# GUI backends.
 if not os.environ.has_key("DISPLAY"):
     mpl.use("AGG")
 # mpl.use('Qt4Agg')
@@ -21,6 +24,7 @@ class ConfigParser():
     """
     ConfigParser class is a generic interface
     for command line options and configuration file based options.
+    Currently only argument parsing is supported.
     """
     def __init__(self):
         pass
@@ -41,13 +45,20 @@ class ConfigParser():
         parser.add_argument("--title", help="title")
         parser.add_argument("--x-title", help="title on x axis")
         parser.add_argument("--y-title", help="title on y axis")
-        parser.add_argument("--min-x", default=None, type=float)
-        parser.add_argument("--max-x", default=None, type=float)
-        parser.add_argument("--min-y", default=None, type=float)
-        parser.add_argument("--max-y", default=None, type=float)
-        parser.add_argument("--no-x-ticks", action="store_true")
-        parser.add_argument("--no-y-ticks", action="store_true")
-        parser.add_argument("--no-legend", action="store_true")
+        parser.add_argument("--min-x", default=None, type=float,
+                            help="Minimum x value")
+        parser.add_argument("--max-x", default=None, type=float,
+                            help="Maximum x value")
+        parser.add_argument("--min-y", default=None, type=float,
+                            help="Minimum y value")
+        parser.add_argument("--max-y", default=None, type=float,
+                            help="Maximum y value")
+        parser.add_argument("--no-x-ticks", action="store_true",
+                            help="Do not show x ticks")
+        parser.add_argument("--no-y-ticks", action="store_true",
+                            help="Do not show y ticks")
+        parser.add_argument("--no-legend", action="store_true",
+                            help="Do not show legends")
         parser.add_argument("--show-grid", action="store_true",
                             help="Show grid")
         parser.add_argument("--scatter-size", default=20, type=float,
