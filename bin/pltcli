@@ -41,6 +41,10 @@ class ConfigParser():
         parser.add_argument("--title", help="title")
         parser.add_argument("--x-title", help="title on x axis")
         parser.add_argument("--y-title", help="title on y axis")
+        parser.add_argument("--min-x", default=None, type=int)
+        parser.add_argument("--max-x", default=None, type=int)
+        parser.add_argument("--min-y", default=None, type=int)
+        parser.add_argument("--max-y", default=None, type=int)
         parser.add_argument("--show-grid", action="store_true",
                             help="Show grid")
         parser.add_argument("--scatter-size", default=20, type=float,
@@ -236,7 +240,16 @@ class Plotter():
     def commonHook(self, ax,
                    title=None,
                    xtitle=None,
-                   ytitle=None):
+                   ytitle=None,
+                   min_x=None,
+                   max_x=None,
+                   min_y=None,
+                   max_y=None):
+        if min_x != None and max_x != None:
+            ax.set_xlim(min_x, max_x)
+        if min_y != None  and max_y != None:
+            print "foo"
+            ax.set_ylim(min_y, max_y)
         if title:
             ax.set_title(title)
         if xtitle:
@@ -426,7 +439,11 @@ class PltCli():
         self.plotter.commonHook(ax,
                                 title=self.args.title,
                                 xtitle=self.args.x_title,
-                                ytitle=self.args.y_title)
+                                ytitle=self.args.y_title,
+                                min_x=self.args.min_x,
+                                min_y=self.args.min_y,
+                                max_x=self.args.max_x,
+                                max_y=self.args.max_y)
         if self.args.legend_pos == "ru":
             plt.legend(loc=1)
         elif self.args.legend_pos == "lu":
