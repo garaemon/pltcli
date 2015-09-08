@@ -35,6 +35,7 @@ class ConfigParser():
                             help="Labels of files which are used in legends.")
         parser.add_argument("--alpha", type=float, default=1,
                             help="transparency parmaeter")
+        parser.add_argument("--fill", action="store_true", help="Fill plot")
         parser.add_argument("--line-width", type=float, default=1,
                             help="line width")
         parser.add_argument("--title", help="title")
@@ -259,17 +260,17 @@ class ScatterPlotter(Plotter):
             print "Plotting", d.getLabel()
             c = color_theme.colorCycle()[i % len(color_theme.colorCycle())]
             ax.scatter(xs, ys, s=scatter_size, label=d.getLabel(), alpha=alpha, color=c)
-            min_x = min(xs + [min_x])
-            max_x = max(xs + [max_x])
-            min_y = min(ys + [min_y])
-            max_y = max(ys + [max_y])
+            min_x = min(min_x, np.amin(xs))
+            max_x = max(max_x, np.amax(xs))
+            min_y = min(min_y, np.amin(ys))
+            max_y = max(max_y, np.amax(ys))
         if tight:
             ax.set_xlim(min_x, max_x)
             ax.set_ylim(min_y, max_y)
         if show_grid:
             ax.grid()
         return ax
-    
+
 class HistogramPlotter(Plotter):
     plotter_name = ["histogram", "hist"]
     def run(self, data, xtitle=None,
@@ -295,7 +296,9 @@ class LinePlotter(Plotter):
     def run(self, data, show_grid=False, xtitle=None,
             ytitle=None, sort_x=False, tight=False,
             alpha=None,
+            fill=False,
             line_width=1,
+            color_theme=None,
             **args):
         """
         Plot data using line plotting.
@@ -305,9 +308,10 @@ class LinePlotter(Plotter):
         max_x = -sys.float_info.max
         min_y = sys.float_info.max
         max_y = -sys.float_info.max
-        for d in data:
+        for d, i in zip(data, range(len(data))):
             xs = d.xs()
             ys = d.ys()
+            c = color_theme.colorCycle()[i % len(color_theme.colorCycle())]
             concatenated = zip(xs, ys)
             if sort_x:
                 concatenated.sort(key=lambda x: x[0])
@@ -317,16 +321,19 @@ class LinePlotter(Plotter):
             line, = ax.plot(xs, ys, label=d.getLabel(), alpha=alpha,
                             lw=line_width)
             line.set_antialiased(True)
-            min_x = min(xs + [min_x])
-            max_x = max(xs + [max_x])
-            min_y = min(ys + [min_y])
-            max_y = max(ys + [max_y])
+            min_x = min(min_x, np.amin(xs))
+            max_x = max(max_x, np.amax(xs))
+            min_y = min(min_y, np.amin(ys))
+            max_y = max(max_y, np.amax(ys))
+            if fill:
+                ax.fill_between(xs, ys, facecolor=c)
         if tight:
             ax.set_xlim(min_x, max_x)
             ax.set_ylim(min_y, max_y)
         if show_grid:
             ax.grid()
         return ax
+
 class StatsPlotter(Plotter):
     plotter_name = ["stats"]
     def run(self, data, **args):
@@ -342,6 +349,7 @@ class StatsPlotter(Plotter):
                 print "      max:", np.amax(d.getDataFromField(index))
                 print "      mean:", np.mean(d.getDataFromField(index))
         return None
+
 class HeatmapPlotter(Plotter):
     plotter_name = ["heatmap"]
     def run(self, data, **args):
@@ -373,7 +381,7 @@ class HeatmapPlotter(Plotter):
             ax.set_yticklabels(sorted(list(set(ys))))
         fig.colorbar(cax)
         return ax
-    
+
 PLOTTER_CLASSES = [ScatterPlotter, LinePlotter, HistogramPlotter,
                    StatsPlotter, HeatmapPlotter]
 
@@ -411,7 +419,8 @@ class PltCli():
                               alpha=self.args.alpha,
                               scatter_size=self.args.scatter_size,
                               line_width=self.args.line_width,
-                              color_theme=color_theme)
+                              color_theme=color_theme,
+                              fill=self.args.fill)
         if self.args.type == "stats":
             return
         self.plotter.commonHook(ax,
