@@ -25,7 +25,7 @@ from itertools import chain
 import numpy as np
 
 
-class ConfigParser():
+class ConfigParser(object):
     """
     ConfigParser class is a generic interface
     for command line options and configuration file based options.
@@ -33,7 +33,7 @@ class ConfigParser():
     """
     def __init__(self):
         pass
-    def argParser(self):
+    def arg_parser(self):
         parser = argparse.ArgumentParser(prog='pltcli')
         parser.add_argument("--type", "-t", default="line",
                             help="Chart type. default is line (%s)"
@@ -83,7 +83,7 @@ class ConfigParser():
                             help="filter data by inline python")
         return parser
 
-class Theme():
+class Theme(object):
     """
     Super class for color theme.
     It requires following methods to subclasses:
@@ -164,7 +164,7 @@ def expandFile(filename):
     else:
         return [(filename, 0, 1, 2)]
 
-class FileData():
+class FileData(object):
     # Use regular expression to check value is able to be parsed
     # into float value
     # see http://d.hatena.ne.jp/artgear/20130222/float_type_regular_expression
@@ -253,7 +253,7 @@ class FileData():
         else:
             return "%s[%s:%s]" % (self.filename, self.xfield, self.yfield)
 
-class Plotter():
+class Plotter(object):
     def run(self, data, **args):
         raise Exception("Need to overload")
 
@@ -398,7 +398,7 @@ class HeatmapPlotter(Plotter):
 PLOTTER_CLASSES = [ScatterPlotter, LinePlotter, HistogramPlotter,
                    StatsPlotter, HeatmapPlotter]
 
-class PltCli():
+class PltCli(object):
     """Application class"""
     def __init__(self, args):
         for klass in PLOTTER_CLASSES:
@@ -466,6 +466,6 @@ class PltCli():
 
 if __name__ == "__main__":
     parser = ConfigParser()
-    args = parser.argParser().parse_args()
+    args = parser.arg_parser().parse_args()
     pltcli = PltCli(args)
     pltcli.run()
