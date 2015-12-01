@@ -17,12 +17,27 @@ if not os.environ.has_key("DISPLAY"):
 # mpl.use('GTK')
 # mpl.use('WXAgg')
 import matplotlib.pyplot as plt
+plt.ion()
 import argparse
 import sys
 import csv
 import re
 from itertools import chain
 import numpy as np
+import thread
+import threading
+
+def raw_input_with_timeout(prompt, timeout=30.0):
+    print prompt,
+    timer = threading.Timer(timeout, thread.interrupt_main)
+    astring = None
+    try:
+        timer.start()
+        astring = raw_input(prompt)
+    except KeyboardInterrupt:
+        pass
+    timer.cancel()
+    return astring
 
 
 class ConfigParser(object):
@@ -458,7 +473,8 @@ class PltCli(object):
         if self.args.output:
             plt.savefig(self.args.output)
         else:
-            plt.show()
+            while not raw_input_with_timeout("", 0.1):
+                plt.show()
 
 if __name__ == "__main__":
     parser = ConfigParser()
