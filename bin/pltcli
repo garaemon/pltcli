@@ -17,7 +17,7 @@ if not os.environ.has_key("DISPLAY"):
 # mpl.use('GTK')
 # mpl.use('WXAgg')
 import matplotlib.pyplot as plt
-plt.ion()
+# plt.ion()
 import argparse
 import sys
 import csv
@@ -26,6 +26,28 @@ from itertools import chain
 import numpy as np
 import thread
 import threading
+from scipy import optimize
+from numpy import exp
+
+def fit_parabora_func(parameter,x,y):
+    a = parameter[0]
+    b = parameter[1]
+    # c = parameter[2]
+    residual = y-(a*x**2+b*x)
+    return residual
+# def fit_parabora_inv_func(parameter,x,y):
+def fit_parabora_inv_func(x, a, b, c,d):
+    # a = parameter[0]
+    # b = parameter[1]
+    # c = parameter[2]
+    # d = parameter[3]
+    # c = parameter[2]
+    # residual = y-(a*x**2+b*x)
+    # residual = y-(exp(a * x + b)*c+d)
+    # return residual
+    return  a * np.exp(-b * x+c)+d
+    # return b / (1 + a * x ** 2) + c
+
 
 def raw_input_with_timeout(prompt, timeout=30.0):
     print prompt,
@@ -96,6 +118,8 @@ class ConfigParser(object):
                             help="position of legend (ru, lu, rl, ll)")
         parser.add_argument("--filter",
                             help="filter data by inline python")
+        parser.add_argument("--fit-parabora", action="store_true")
+        parser.add_argument("--fit-parabora-inv", action="store_true")
         return parser
 
 class Theme(object):
@@ -221,14 +245,18 @@ class FileData(object):
                     # setup xfield_index and yfield_index
         if isinstance(self.xfield, int):
             self.xfield_index = self.xfield
+            self.xfield = self.index[self.xfield_index]
         elif self.int_reg.match(self.xfield):
             self.xfield_index = int(self.xfield)
+            self.xfield = self.index[self.xfield_index]
         else:
             self.xfield_index = self.index.index(self.xfield)
         if isinstance(self.yfield, int):
             self.yfield_index = self.yfield
+            self.yfield = self.index[self.yfield_index]
         elif self.int_reg.match(self.yfield):
             self.yfield_index = int(self.yfield)
+            self.yfield = self.index[self.yfield_index]
         else:
             self.yfield_index = self.index.index(self.yfield)
         if self.zfield:
@@ -327,6 +355,8 @@ class LinePlotter(Plotter):
             fill=False,
             line_width=1,
             color_theme=None,
+            fit_parabora=None,
+            fit_parabora_inv=None,
             **args):
         """
         Plot data using line plotting.
@@ -355,6 +385,35 @@ class LinePlotter(Plotter):
             max_y = max(max_y, np.amax(ys))
             if fill:
                 ax.fill_between(xs, ys, facecolor=c)
+            if fit_parabora:
+                moved_xs = xs - xs[0]
+                result = optimize.leastsq(fit_parabora_func,
+                                          [0,0],
+                                          args=(moved_xs, ys - ys[0]))
+
+                a = result[0][0]
+                b = result[0][1]
+
+                aa = a
+                bb = - 2 * a * xs[0] + b
+                cc = a * xs[0] * xs[0] - b * xs[0] + ys[0]
+                # c_fit=result[0][2]
+                # x -> x+xs[0]
+                print "Fitting result:", (aa, bb, cc)
+                ax.plot(xs, aa * xs ** 2 + bb * xs + cc,
+                        c="gray")
+            if fit_parabora_inv:
+                result = optimize.curve_fit(fit_parabora_inv_func,
+                                            xs, ys)
+                a = result[0][0]
+                b = result[0][1]
+                c = result[0][2]
+                d = result[0][3]
+                # c_fit=result[0][2]
+                # x -> x+xs[0]
+                print "Fitting result:", (a, b, c, d)
+                ax.plot(xs, fit_parabora_inv_func(xs, a, b, c,d),
+                        c="gray")
         if tight:
             ax.set_xlim(min_x, max_x)
             ax.set_ylim(min_y, max_y)
@@ -444,7 +503,9 @@ class PltCli(object):
                               scatter_size=self.args.scatter_size,
                               line_width=self.args.line_width,
                               color_theme=color_theme,
-                              fill=self.args.fill)
+                              fill=self.args.fill,
+                              fit_parabora=self.args.fit_parabora,
+                              fit_parabora_inv=self.args.fit_parabora_inv)
         if self.args.type == "stats":
             return
         if self.args.min_x != None and self.args.max_x != None:
@@ -454,9 +515,9 @@ class PltCli(object):
         if self.args.title:
             ax.set_title(self.args.title)
         if self.args.x_title:
-            ax.set_xlabel(self.args.x_title)
+            ax.set_xlabel(self.args.x_title, size=22)
         if self.args.y_title:
-            ax.set_ylabel(self.args.y_title)
+            ax.set_ylabel(self.args.y_title, size=22)
         if self.args.no_x_ticks:
             ax.get_xaxis().set_visible(False)
         if self.args.no_y_ticks:
@@ -473,8 +534,7 @@ class PltCli(object):
         if self.args.output:
             plt.savefig(self.args.output)
         else:
-            while not raw_input_with_timeout("", 0.1):
-                plt.show()
+            plt.show()
 
 if __name__ == "__main__":
     parser = ConfigParser()
