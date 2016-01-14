@@ -81,6 +81,7 @@ class ConfigParser(object):
                             help="Labels of files which are used in legends.")
         parser.add_argument("--alpha", type=float, default=1,
                             help="transparency parmaeter")
+        parser.add_argument("--color-offset", type=int, default=0)
         parser.add_argument("--fill", action="store_true", help="Fill plot")
         parser.add_argument("--line-width", type=float, default=1,
                             help="line width")
@@ -130,15 +131,20 @@ class Theme(object):
     It required following attributes to subclasses:
       - theme_name: a list of names to represent the color theme.
     """
+    def __init__(self, offset):
+        self.offset = offset
+    def colorCycleImpl(self):
+        raise Exception("colorCycleImpl is not yet implemented")
     def colorCycle(self):
-        raise Exception("colorCycle is not yet implemented")
+        cycle = self.colorCycleImpl()
+        return cycle[self.offset:len(cycle)] + cycle[0:self.offset]
 
 class D3JSTheme10(Theme):
     """
     see https://github.com/mbostock/d3/wiki/Ordinal-Scales#category10
     """
     theme_name = ["d3js10", "D3JSTheme10"]
-    def colorCycle(self):
+    def colorCycleImpl(self):
         return ["#1f77b4",
                 "#ff7f0e",
                 "#2ca02c",
@@ -156,7 +162,7 @@ class D3JSTheme20(Theme):
     see https://github.com/mbostock/d3/wiki/Ordinal-Scales#category20
     """
     theme_name = ["d3js20", "D3JSTheme20"]
-    def colorCycle(self):
+    def colorCycleImpl(self):
         return ["#1f77b4",
                 "#aec7e8",
                 "#ff7f0e",
@@ -492,7 +498,7 @@ class PltCli(object):
         # setup color theme
         for theme in THEME_CLASSES:
             if self.args.color_theme in theme.theme_name:
-                color_theme = theme()
+                color_theme = theme(self.args.color_offset)
                 mpl.rcParams['axes.color_cycle'] = color_theme.colorCycle()
                 break
         ax = self.plotter.run(data,
